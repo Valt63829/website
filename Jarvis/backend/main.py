@@ -71,6 +71,7 @@ def execute_command():
 
     # 🔹 System Info
     elif command == "time":
+        ist = pytz.timezone('Asia/Kolkata')
         now = datetime.datetime.now().strftime("%I:%M %p")
         return jsonify({"message": f"Current time is {now} ⏰"})
 
@@ -131,4 +132,5 @@ def execute_command():
         return jsonify({"message": "Command not recognized 🤖"})
 
 if __name__ == "__main__":
+
     app.run(debug=True)
