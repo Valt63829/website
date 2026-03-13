@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ramadan Kareem</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --gold:#d4a843;--gold2:#f0cc7a;--gold3:#ffea99;
+  --cream:#f5ead6;--cream2:rgba(245,234,214,.55);
+  --bg:#06060d;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);user-select:none;cursor:default;font-family:'Cormorant Garamond',serif;color:var(--cream);}
+
+/* ── CANVAS LAYERS ── */
+#bgCanvas,#fxCanvas{position:fixed;inset:0;pointer-events:none;}
+#bgCanvas{z-index:1;}
+#fxCanvas{z-index:40;}
+
+/* ── LAMP STAGE ── */
+#lampStage{
+  position:fixed;top:0;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;
+  z-index:50;transform-origin:top center;
+  animation:gentleSway 4s ease-in-out infinite;
+}
+@keyframes gentleSway{
+  0%,100%{transform:translateX(-50%) rotate(-1.5deg);}
+  50%{transform:translateX(-50%) rotate(1.5deg);}
+}
+
+/* chain links */
+.chain{display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:2px;}
+.chain-link{
+  width:10px;height:7px;border:1.5px solid #7a6020;
+  border-radius:40%;background:linear-gradient(90deg,#5a4010,#c8980a,#5a4010);
+}
+.chain-link:nth-child(odd){width:7px;height:10px;}
+
+/* lantern SVG wrapper */
+#lanternWrap{position:relative;width:90px;height:160px;}
+#lanternWrap svg{width:100%;height:100%;}
+
+/* glow ring behind lantern */
+.lamp-glow-ring{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,190,40,.0) 30%,transparent 70%);
+  transition:background 0.6s ease;
+  pointer-events:none;
+}
+body.lit .lamp-glow-ring{
+  background:radial-gradient(circle,rgba(255,190,40,.55) 20%,rgba(255,140,20,.2) 55%,transparent 75%);
+  animation:ringPulse 1.5s ease-in-out infinite;
+}
+@keyframes ringPulse{0%,100%{transform:translate(-50%,-50%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.15);}}
+
+/* cord */
+#cordArea{
+  display:flex;flex-direction:column;align-items:center;
+  cursor:grab;padding:0 20px;
+}
+#cordArea:active{cursor:grabbing;}
+.cord-line{
+  width:2px;height:100px;
+  background:linear-gradient(to bottom,#8a6010,#c8a020 60%,#e8c040);
+  position:relative;transition:height .15s ease;
+}
+.cord-line::after{
+  content:'';position:absolute;bottom:-8px;left:50%;
+  transform:translateX(-50%);
+  width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff9d0,#f0cc7a 40%,#a06808);
+  box-shadow:0 0 12px rgba(212,168,67,.6),0 0 4px rgba(255,230,120,.8);
+}
+
+/* pull hint */
+#pullHint{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,110px);
+  text-align:center;pointer-events:none;z-index:60;
+  animation:hintFloat 2.2s ease-in-out infinite;
+}
+#pullHint .hl{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(212,168,67,.55);}
+#pullHint .arrow{font-size:22px;color:rgba(212,168,67,.35);display:block;margin-top:4px;}
+@keyframes hintFloat{0%,100%{opacity:.6;transform:translate(-50%,110px);}50%{opacity:1;transform:translate(-50%,120px);}}
+body.lit #pullHint{opacity:0;transition:opacity .3s;}
+
+/* ── FLASH OVERLAY ── */
+#flashOverlay{
+  position:fixed;inset:0;background:white;opacity:0;
+  pointer-events:none;z-index:45;transition:opacity .15s ease;
+}
+
+/* ── SCENE ELEMENTS (hidden until lit) ── */
+.scene-el{opacity:0;transition-property:opacity,transform;transition-timing-function:ease;}
+
+/* moon */
+#moonWrap{
+  position:fixed;top:60px;right:8%;z-index:15;
+  transition:opacity 1.8s ease 1.6s, transform 1.8s cubic-bezier(.16,1,.3,1) 1.6s;
+  opacity:0;transform:translateY(50px);
+}
+body.lit #moonWrap{opacity:1;transform:translateY(0);}
+.moon-disc{
+  width:100px;height:100px;border-radius:50%;
+  background:radial-gradient(circle at 38% 34%,#fffde0,#f0d870 40%,#c8a020 75%,#8a6808);
+  position:relative;
+  box-shadow:0 0 40px rgba(212,168,67,.6),0 0 90px rgba(212,168,67,.25),0 0 160px rgba(212,168,67,.1);
+}
+.moon-disc::after{
+  content:'';position:absolute;top:-8px;left:16px;
+  width:90px;height:90px;border-radius:50%;
+  background:radial-gradient(circle at 40% 40%,#0d1230,#090e22);
+}
+.moon-star-el{
+  position:absolute;top:18px;right:-22px;
+  font-size:18px;color:var(--gold2);
+  filter:drop-shadow(0 0 8px var(--gold));
+  animation:spinStar 14s linear infinite;
+}
+@keyframes spinStar{to{transform:rotate(360deg);}}
+
+/* aurora */
+#aurora{
+  position:fixed;top:0;left:0;right:0;height:40%;
+  pointer-events:none;z-index:3;
+  opacity:0;transition:opacity 2s ease 1.4s;
+}
+body.lit #aurora{opacity:1;}
+
+/* mosque */
+#mosqueWrap{
+  position:fixed;bottom:0;left:0;right:0;
+  display:flex;justify-content:center;align-items:flex-end;
+  z-index:15;pointer-events:none;
+  opacity:0;transform:translateY(40px);
+  transition:opacity 2s ease 2.2s, transform 2s cubic-bezier(.16,1,.3,1) 2.2s;
+}
+body.lit #mosqueWrap{opacity:1;transform:translateY(0);}
+
+/* side lanterns */
+#sideLanterns{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;
+  padding:0 4%;pointer-events:none;z-index:15;
+  opacity:0;transform:translateY(-20px);
+  transition:opacity 1.5s ease 2s, transform 1.5s ease 2s;
+}
+body.lit #sideLanterns{opacity:1;transform:translateY(0);}
+.sl{display:flex;flex-direction:column;align-items:center;}
+.sl-wire{width:1px;height:var(--h,55px);background:linear-gradient(to bottom,rgba(212,168,67,.7),rgba(212,168,67,.2));}
+.sl-cap{width:32px;height:8px;background:var(--gold);border-radius:2px;box-shadow:0 0 8px var(--gold);}
+.sl-body{
+  width:24px;height:40px;
+  background:linear-gradient(135deg,#c8870a,#f0cc7a 45%,#c8870a);
+  border-radius:3px 3px 8px 8px;
+  box-shadow:0 0 18px rgba(212,168,67,.75),0 0 36px rgba(212,168,67,.3);
+  animation:slSway var(--s,3s) ease-in-out infinite alternate;
+  position:relative;overflow:hidden;
+}
+.sl-body::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(255,255,200,.3),transparent);
+  border-radius:inherit;
+}
+.sl-bot{width:7px;height:11px;background:var(--gold);border-radius:0 0 4px 4px;}
+@keyframes slSway{from{transform:rotate(-4deg);}to{transform:rotate(4deg);}}
+
+/* string decorations between lanterns */
+#stringDeco{
+  position:fixed;top:0;left:0;right:0;
+  pointer-events:none;z-index:14;
+  opacity:0;transition:opacity 1.5s ease 2.2s;
+}
+body.lit #stringDeco{opacity:1;}
+
+/* ── GREETING ── */
+#greeting{
+  position:fixed;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:0 24px;z-index:20;pointer-events:none;
+}
+.g-arabic{
+  font-family:'Amiri',serif;font-size:clamp(28px,5vw,56px);
+  color:var(--gold2);letter-spacing:.08em;line-height:1.4;
+  text-shadow:0 0 40px rgba(212,168,67,.7),0 0 80px rgba(212,168,67,.3);
+  opacity:0;transform:translateY(24px) scale(.97);
+  transition:opacity 1.2s ease 1.8s, transform 1.2s cubic-bezier(.16,1,.3,1) 1.8s;
+}
+.g-stars{
+  color:var(--gold);font-size:18px;letter-spacing:18px;
+  margin:14px 0 10px;
+  filter:drop-shadow(0 0 10px rgba(212,168,67,.8));
+  opacity:0;transform:scale(.8);
+  transition:opacity .8s ease 2.1s, transform .8s cubic-bezier(.34,1.56,.64,1) 2.1s;
+}
+.g-title{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(32px,6vw,76px);font-weight:700;
+  letter-spacing:.07em;line-height:1.05;
+  color:var(--cream);
+  text-shadow:0 0 50px rgba(212,168,67,.5),0 4px 8px rgba(0,0,0,.6);
+  opacity:0;transform:translateY(30px);
+  transition:opacity 1.2s ease 2.3s, transform 1.2s cubic-bezier(.16,1,.3,1) 2.3s;
+}
+.g-title span{
+  color:var(--gold2);
+  text-shadow:0 0 30px rgba(212,168,67,.8),0 0 60px rgba(212,168,67,.4);
+}
+.g-sub{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(16px,2.8vw,36px);font-weight:400;
+  letter-spacing:.16em;color:var(--gold);
+  text-shadow:0 0 24px rgba(212,168,67,.6);
+  margin-bottom:22px;
+  opacity:0;transform:translateY(20px);
+  transition:opacity 1s ease 2.55s, transform 1s ease 2.55s;
+}
+.g-divider{
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+  opacity:0;transition:opacity .8s ease 2.75s;
+}
+.g-line{width:80px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);}
+.g-gem{
+  width:10px;height:10px;background:var(--gold);transform:rotate(45deg);
+  box-shadow:0 0 12px var(--gold),0 0 24px rgba(212,168,67,.4);
+}
+.g-msg{
+  font-size:clamp(13px,1.8vw,17px);font-weight:300;font-style:italic;
+  color:var(--cream2);line-height:2;max-width:460px;letter-spacing:.04em;
+  opacity:0;transform:translateY(20px);
+  transition:opacity 1s ease 2.95s, transform 1s ease 2.95s;
+  margin-bottom:30px;
+}
+.g-badge{
+  display:inline-flex;align-items:center;gap:12px;
+  border:1px solid rgba(212,168,67,.4);border-radius:40px;
+  padding:10px 28px;font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--gold2);background:rgba(212,168,67,.08);
+  backdrop-filter:blur(8px);
+  box-shadow:0 0 30px rgba(212,168,67,.12),inset 0 0 20px rgba(212,168,67,.05);
+  opacity:0;transition:opacity .8s ease 3.15s;
+}
+
+/* show all when lit */
+body.lit .g-arabic{opacity:1;transform:translateY(0) scale(1);}
+body.lit .g-stars{opacity:1;transform:scale(1);}
+body.lit .g-title{opacity:1;transform:translateY(0);}
+body.lit .g-sub{opacity:1;transform:translateY(0);}
+body.lit .g-divider{opacity:1;}
+body.lit .g-msg{opacity:1;transform:translateY(0);}
+body.lit .g-badge{opacity:1;}
+
+/* corner ornaments */
+.c-orn{
+  position:fixed;font-size:28px;z-index:25;pointer-events:none;
+  color:rgba(212,168,67,0);transition:color 1.2s ease 2.8s;
+}
+body.lit .c-orn{color:rgba(212,168,67,.2);}
+.c-orn.tl{top:20px;left:22px;}
+.c-orn.tr{top:20px;right:22px;transform:scaleX(-1);}
+.c-orn.bl{bottom:20px;left:22px;transform:scaleY(-1);}
+.c-orn.br{bottom:20px;right:22px;transform:scale(-1);}
+
+/* lamp vanish when lit */
+body.lit #lampStage{animation:lampVanish 1.2s cubic-bezier(.4,0,.6,1) forwards;}
+@keyframes lampVanish{
+  0%  {transform:translateX(-50%) scale(1);opacity:1;}
+  20% {transform:translateX(-50%) scale(1.08) translateY(-12px);opacity:1;}
+  60% {transform:translateX(-50%) scale(.5) translateY(-90px);opacity:.3;}
+  100%{transform:translateX(-50%) scale(.1) translateY(-180px);opacity:0;pointer-events:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- canvas layers -->
+<canvas id="bgCanvas"></canvas>
+<canvas id="fxCanvas"></canvas>
+
+<!-- flash overlay -->
+<div id="flashOverlay"></div>
+
+<!-- aurora shimmer -->
+<canvas id="aurora"></canvas>
+
+<!-- moon -->
+<div id="moonWrap">
+  <div class="moon-disc"></div>
+  <div class="moon-star-el">★</div>
+</div>
+
+<!-- string decoration -->
+<canvas id="stringDeco" height="120"></canvas>
+
+<!-- side lanterns -->
+<div id="sideLanterns">
+  <div class="sl" style="--s:3.2s;--h:65px"><div class="sl-wire"></div><div class="sl-cap"></div><div class="sl-body"></div><div class="sl-bot"></div></div>
+  <div class="sl" style="--s:2.7s;--h:50px"><div class="sl-wire"></div><div class="sl-cap"></div><div class="sl-body"></div><div class="sl-bot"></div></div>
+  <div class="sl" style="--s:3.8s;--h:72px"><div class="sl-wire"></div><div class="sl-cap"></div><div class="sl-body"></div><div class="sl-bot"></div></div>
+  <div class="sl" style="--s:2.4s;--h:58px"><div class="sl-wire"></div><div class="sl-cap"></div><div class="sl-body"></div><div class="sl-bot"></div></div>
+  <div class="sl" style="--s:3.5s;--h:45px"><div class="sl-wire"></div><div class="sl-cap"></div><div class="sl-body"></div><div class="sl-bot"></div></div>
+</div>
+
+<!-- corner ornaments -->
+<div class="c-orn tl">❧</div>
+<div class="c-orn tr">❧</div>
+<div class="c-orn bl">❧</div>
+<div class="c-orn br">❧</div>
+
+<!-- LAMP -->
+<div id="lampStage">
+  <div class="chain">
+    <div class="chain-link"></div><div class="chain-link"></div>
+    <div class="chain-link"></div><div class="chain-link"></div>
+    <div class="chain-link"></div><div class="chain-link"></div>
+    <div class="chain-link"></div><div class="chain-link"></div>
+  </div>
+  <div id="lanternWrap">
+    <div class="lamp-glow-ring"></div>
+    <!-- Ornate Moroccan SVG Lantern -->
+    <svg viewBox="0 0 90 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="innerFlame" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fff8c0" stop-opacity="1"/>
+          <stop offset="40%" stop-color="#ffcc40" stop-opacity=".9"/>
+          <stop offset="100%" stop-color="#ff7800" stop-opacity=".3"/>
+        </radialGradient>
+        <radialGradient id="bodyGrad" cx="40%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#4a2e04"/>
+          <stop offset="100%" stop-color="#1a0e02"/>
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- top cap -->
+      <path d="M30 22 Q45 10 60 22 L62 30 Q45 24 28 30 Z" fill="#c89010" stroke="#8a6010" stroke-width=".5"/>
+      <rect x="28" y="28" width="34" height="8" rx="2" fill="#d4a020" stroke="#8a6010" stroke-width=".5"/>
+      <!-- star on top -->
+      <polygon points="45,12 47,18 53,18 48,22 50,28 45,24 40,28 42,22 37,18 43,18" fill="#f0cc7a" stroke="#c89010" stroke-width=".5" opacity=".8"/>
+      <!-- lantern body frame -->
+      <path d="M28 36 Q20 60 22 95 Q30 125 45 130 Q60 125 68 95 Q70 60 62 36 Z" fill="url(#bodyGrad)" stroke="#c89010" stroke-width="1"/>
+      <!-- inner flame/glow (hidden by default, shown when lit) -->
+      <ellipse id="flameEl" cx="45" cy="85" rx="18" ry="28" fill="url(#innerFlame)" opacity="0" style="transition:opacity .6s ease"/>
+      <!-- islamic lattice arches - decorative pattern -->
+      <g stroke="#c89010" stroke-width=".8" fill="none" opacity=".6">
+        <!-- vertical ribs -->
+        <line x1="35" y1="36" x2="33" y2="128"/>
+        <line x1="45" y1="36" x2="45" y2="130"/>
+        <line x1="55" y1="36" x2="57" y2="128"/>
+        <!-- horizontal bands -->
+        <path d="M27 55 Q45 50 63 55"/>
+        <path d="M24 75 Q45 69 66 75"/>
+        <path d="M23 95 Q45 89 67 95"/>
+        <path d="M25 112 Q45 107 65 112"/>
+        <!-- pointed arches -->
+        <path d="M27 55 Q32 44 37 55"/>
+        <path d="M37 55 Q42 44 47 55"/>
+        <path d="M47 55 Q52 44 57 55"/>
+        <path d="M57 55 Q62 44 67 55"/>
+        <path d="M24 75 Q30 63 36 75"/>
+        <path d="M36 75 Q42 63 48 75"/>
+        <path d="M48 75 Q54 63 60 75"/>
+        <path d="M60 75 Q65 63 70 75"/>
+      </g>
+      <!-- gold rim strips -->
+      <rect x="25" y="53" width="40" height="3" rx="1" fill="#c89010" opacity=".7"/>
+      <rect x="22" y="73" width="46" height="3" rx="1" fill="#c89010" opacity=".7"/>
+      <rect x="21" y="93" width="48" height="3" rx="1" fill="#c89010" opacity=".7"/>
+      <rect x="23" y="110" width="44" height="3" rx="1" fill="#c89010" opacity=".7"/>
+      <!-- bottom cap -->
+      <path d="M22 128 Q45 138 68 128 L66 120 Q45 130 24 120 Z" fill="#c89010" stroke="#8a6010" stroke-width=".5"/>
+      <ellipse cx="45" cy="128" rx="22" ry="5" fill="#a07010" opacity=".8"/>
+      <!-- tassel -->
+      <rect x="44" y="133" width="2" height="14" fill="#8a6010"/>
+      <circle cx="45" cy="149" r="4" fill="url(#innerFlame)" stroke="#c89010" stroke-width=".5"/>
+    </svg>
+  </div>
+  <!-- cord -->
+  <div id="cordArea">
+    <div class="cord-line" id="cordLine"></div>
+  </div>
+</div>
+
+<!-- pull hint -->
+<div id="pullHint">
+  <div class="hl">Pull to reveal</div>
+  <span class="arrow">↓</span>
+</div>
+
+<!-- GREETING -->
+<div id="greeting">
+  <div class="g-arabic">رَمَضَانُ كَرِيمٌ</div>
+  <div class="g-stars">✦ ✦ ✦</div>
+  <div class="g-title">Ramadan</div>
+  <div class="g-sub">Mubarak</div>
+  <div class="g-divider">
+    <div class="g-line"></div><div class="g-gem"></div><div class="g-line"></div>
+  </div>
+  <p class="g-msg">
+    May this sacred month fill your home with light,<br>
+    your heart with peace, and your soul with grace.<br>
+    <em>Wishing you a blessed and joyful Ramadan.</em>
+  </p>
+  <div class="g-badge">☽ &nbsp; 1446 Hijri &nbsp; · &nbsp; Ramadan &nbsp; ☽</div>
+</div>
+
+<!-- MOSQUE -->
+<div id="mosqueWrap">
+<svg viewBox="0 0 1200 240" width="100%" height="240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+  <defs>
+    <linearGradient id="mq" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1c2248"/>
+      <stop offset="100%" stop-color="#06060d"/>
+    </linearGradient>
+    <linearGradient id="mq2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#141830"/>
+      <stop offset="100%" stop-color="#06060d"/>
+    </linearGradient>
+  </defs>
+  <!-- ground -->
+  <rect x="0" y="200" width="1200" height="40" fill="url(#mq)"/>
+  <!-- far left minaret -->
+  <rect x="60" y="50" width="26" height="165" fill="url(#mq)"/>
+  <polygon points="73,8 55,50 91,50" fill="#1c2248"/>
+  <rect x="67" y="2" width="12" height="10" fill="#252a5a"/>
+  <circle cx="73" cy="1" r="3" fill="#d4a843" opacity=".6"/>
+  <!-- far right minaret -->
+  <rect x="1114" y="50" width="26" height="165" fill="url(#mq)"/>
+  <polygon points="1127,8 1109,50 1145,50" fill="#1c2248"/>
+  <rect x="1121" y="2" width="12" height="10" fill="#252a5a"/>
+  <circle cx="1127" cy="1" r="3" fill="#d4a843" opacity=".6"/>
+  <!-- mid left minaret -->
+  <rect x="220" y="90" width="20" height="125" fill="url(#mq)"/>
+  <polygon points="230,62 215,90 245,90" fill="#1c2248"/>
+  <circle cx="230" cy="60" r="4" fill="#d4a843" opacity=".5"/>
+  <!-- mid right minaret -->
+  <rect x="960" y="90" width="20" height="125" fill="url(#mq)"/>
+  <polygon points="970,62 955,90 985,90" fill="#1c2248"/>
+  <circle cx="970" cy="60" r="4" fill="#d4a843" opacity=".5"/>
+  <!-- inner left minaret -->
+  <rect x="350" y="110" width="16" height="105" fill="url(#mq)"/>
+  <polygon points="358,88 346,110 370,110" fill="#1c2248"/>
+  <!-- inner right minaret -->
+  <rect x="834" y="110" width="16" height="105" fill="url(#mq)"/>
+  <polygon points="842,88 830,110 854,110" fill="#1c2248"/>
+  <!-- main central dome -->
+  <ellipse cx="600" cy="110" rx="145" ry="90" fill="url(#mq)"/>
+  <rect x="455" y="110" width="290" height="100" fill="url(#mq)"/>
+  <!-- main dome crescent on top -->
+  <circle cx="600" cy="24" r="8" fill="#d4a843" opacity=".7"/>
+  <path d="M596 18 Q600 10 604 18 Q601 14 596 18Z" fill="#d4a843" opacity=".5"/>
+  <!-- side domes -->
+  <ellipse cx="380" cy="148" rx="80" ry="52" fill="url(#mq2)"/>
+  <rect x="300" y="148" width="160" height="65" fill="url(#mq2)"/>
+  <ellipse cx="820" cy="148" rx="80" ry="52" fill="url(#mq2)"/>
+  <rect x="740" y="148" width="160" height="65" fill="url(#mq2)"/>
+  <!-- far side domes -->
+  <ellipse cx="155" cy="168" rx="60" ry="38" fill="url(#mq2)"/>
+  <rect x="95" y="168" width="120" height="47" fill="url(#mq2)"/>
+  <ellipse cx="1045" cy="168" rx="60" ry="38" fill="url(#mq2)"/>
+  <rect x="985" y="168" width="120" height="47" fill="url(#mq2)"/>
+  <!-- arched windows central -->
+  <rect x="548" y="140" width="32" height="60" rx="16" fill="#111830"/>
+  <rect x="600" y="140" width="32" height="60" rx="16" fill="#111830"/>
+  <rect x="652" y="140" width="32" height="60" rx="16" fill="#111830"/>
+  <!-- window glow (subtle) -->
+  <rect x="550" y="155" width="28" height="30" rx="14" fill="rgba(212,168,67,.06)"/>
+  <rect x="602" y="155" width="28" height="30" rx="14" fill="rgba(212,168,67,.06)"/>
+  <rect x="654" y="155" width="28" height="30" rx="14" fill="rgba(212,168,67,.06)"/>
+  <!-- ground reflection glow -->
+  <ellipse cx="600" cy="230" rx="350" ry="16" fill="rgba(42,60,110,.15)"/>
+</svg>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CANVAS SETUP
+// ═══════════════════════════════════════════════
+const bgC  = document.getElementById('bgCanvas');
+const fxC  = document.getElementById('fxCanvas');
+const aurC = document.getElementById('aurora');
+const strC = document.getElementById('stringDeco');
+const bgX  = bgC.getContext('2d');
+const fxX  = fxC.getContext('2d');
+const aurX = aurC.getContext('2d');
+const strX = strC.getContext('2d');
+
+function resize(){
+  [bgC,fxC,aurC].forEach(c=>{c.width=innerWidth;c.height=innerHeight;});
+  strC.width=innerWidth; strC.height=120;
+}
+resize(); window.addEventListener('resize',resize);
+
+// ═══════════════════════════════════════════════
+// BACKGROUND: stars + floating dust
+// ═══════════════════════════════════════════════
+const stars=[];
+for(let i=0;i<180;i++){
+  stars.push({
+    x:Math.random(),y:Math.random()*0.75,
+    r:Math.random()*1.6+.3,
+    base:Math.random()*.6+.1,
+    speed:Math.random()*3+2,
+    phase:Math.random()*Math.PI*2
+  });
+}
+
+const dust=[];
+for(let i=0;i<60;i++){
+  dust.push({
+    x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+    r:Math.random()*.8+.2,vx:(Math.random()-.5)*.15,
+    vy:-Math.random()*.2-.05,op:Math.random()*.25+.05,
+    life:Math.random()
+  });
+}
+
+let auroraT=0;
+let revealed=false;
+let shootingStars=[];
+let fireflies=[];
+
+// ═══════════════════════════════════════════════
+// PARTICLES (burst on lamp pull)
+// ═══════════════════════════════════════════════
+const particles=[];
+
+function spawnBurst(ox,oy){
+  for(let i=0;i<120;i++){
+    const angle=Math.random()*Math.PI*2;
+    const spd=Math.random()*8+2;
+    const gold=[`rgba(255,230,80,`,`rgba(255,180,40,`,`rgba(240,204,122,`,`rgba(255,255,160,`];
+    particles.push({
+      x:ox,y:oy,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-3,
+      life:1,decay:Math.random()*.02+.012,
+      r:Math.random()*3+1,
+      color:gold[Math.floor(Math.random()*gold.length)],
+      gravity:.12,trail:[]
+    });
+  }
+  // add some slow-floating ember sparks
+  for(let i=0;i<40;i++){
+    const angle=Math.random()*Math.PI*2;
+    const spd=Math.random()*2+.5;
+    particles.push({
+      x:ox,y:oy,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-1.5,
+      life:1,decay:Math.random()*.008+.004,
+      r:Math.random()*1.5+.5,
+      color:'rgba(255,240,120,',
+      gravity:.04,trail:[]
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════
+// FIREFLIES (post-reveal)
+// ═══════════════════════════════════════════════
+function spawnFireflies(){
+  for(let i=0;i<55;i++){
+    fireflies.push({
+      x:Math.random()*innerWidth,
+      y:Math.random()*innerHeight*.8,
+      vx:(Math.random()-.5)*.4,
+      vy:(Math.random()-.5)*.3,
+      r:Math.random()*2+.8,
+      phase:Math.random()*Math.PI*2,
+      speed:Math.random()*.03+.01
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SHOOTING STAR
+// ═══════════════════════════════════════════════
+function spawnShootingStar(){
+  shootingStars.push({
+    x:Math.random()*innerWidth*.6+innerWidth*.1,
+    y:Math.random()*innerHeight*.25,
+    vx:Math.random()*6+4,vy:Math.random()*3+1.5,
+    life:1,len:Math.random()*100+60
+  });
+}
+
+// ═══════════════════════════════════════════════
+// STRING DECORATION
+// ═══════════════════════════════════════════════
+function drawStrings(){
+  strX.clearRect(0,0,strC.width,120);
+  if(!revealed) return;
+  const pts=[0.04,0.2,0.35,0.5,0.65,0.8,0.96].map((f,i)=>({x:strC.width*f,y:i%2===0?0:30}));
+  strX.beginPath();
+  strX.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){
+    const mx=(pts[i-1].x+pts[i].x)/2;
+    strX.quadraticCurveTo(pts[i-1].x,pts[i-1].y+40,mx,(pts[i-1].y+pts[i].y)/2+30);
+    strX.quadraticCurveTo(pts[i].x,pts[i].y+40,pts[i].x,pts[i].y);
+  }
+  strX.strokeStyle='rgba(212,168,67,.35)';
+  strX.lineWidth=1;strX.stroke();
+  // tiny bulb lights along string
+  [.12,.27,.42,.57,.72,.87].forEach(f=>{
+    const x=strC.width*f,y=45;
+    strX.beginPath();strX.arc(x,y,3,0,Math.PI*2);
+    strX.fillStyle='rgba(255,230,100,.8)';strX.fill();
+    strX.beginPath();strX.arc(x,y,7,0,Math.PI*2);
+    strX.fillStyle='rgba(255,200,60,.15)';strX.fill();
+  });
+}
+
+// ═══════════════════════════════════════════════
+// MAIN RENDER LOOP
+// ═══════════════════════════════════════════════
+let t=0;
+function render(){
+  requestAnimationFrame(render);
+  t+=.016; auroraT+=.008;
+  const W=bgC.width,H=bgC.height;
+  bgX.clearRect(0,0,W,H);
+  fxX.clearRect(0,0,W,H);
+
+  // sky background
+  if(revealed){
+    const skyG=bgX.createRadialGradient(W/2,0,0,W/2,0,H*1.2);
+    skyG.addColorStop(0,'#1c2258');skyG.addColorStop(.5,'#0d1230');skyG.addColorStop(1,'#06060d');
+    bgX.fillStyle=skyG;bgX.fillRect(0,0,W,H);
+  } else {
+    bgX.fillStyle='#06060d';bgX.fillRect(0,0,W,H);
+  }
+
+  // stars
+  if(revealed){
+    stars.forEach(s=>{
+      const op=s.base+(Math.sin(t/s.speed+s.phase)*.5+.5)*(1-s.base);
+      bgX.beginPath();bgX.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
+      bgX.fillStyle=`rgba(255,255,255,${op})`;bgX.fill();
+      // star cross glint for bigger ones
+      if(s.r>1.2){
+        bgX.strokeStyle=`rgba(255,255,255,${op*.5})`;bgX.lineWidth=.5;
+        bgX.beginPath();bgX.moveTo(s.x*W-s.r*3,s.y*H);bgX.lineTo(s.x*W+s.r*3,s.y*H);bgX.stroke();
+        bgX.beginPath();bgX.moveTo(s.x*W,s.y*H-s.r*3);bgX.lineTo(s.x*W,s.y*H+s.r*3);bgX.stroke();
+      }
+    });
+  }
+
+  // aurora shimmer
+  if(revealed){
+    aurX.clearRect(0,0,W,aurC.height);
+    for(let i=0;i<4;i++){
+      const x=W*.2+i*W*.2;
+      const w=W*.25+Math.sin(auroraT+i)*W*.05;
+      const h=aurC.height*.6+Math.sin(auroraT*.7+i*1.2)*40;
+      const g=aurX.createRadialGradient(x,0,0,x,0,h);
+      const cols=[`rgba(30,80,120,`,`rgba(40,100,80,`,`rgba(60,40,100,`,`rgba(20,70,100,`];
+      g.addColorStop(0,cols[i]+'0.12)');
+      g.addColorStop(.5,cols[i]+'0.06)');
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      aurX.fillStyle=g;
+      aurX.beginPath();
+      aurX.ellipse(x,0,w/2,h,0,0,Math.PI*2);
+      aurX.fill();
+    }
+  }
+
+  // shooting stars
+  if(revealed){
+    shootingStars=shootingStars.filter(s=>{
+      s.x+=s.vx;s.y+=s.vy;s.life-=.018;
+      if(s.life<=0) return false;
+      const g=fxX.createLinearGradient(s.x-s.vx*8,s.y-s.vy*8,s.x,s.y);
+      g.addColorStop(0,'rgba(255,255,220,0)');
+      g.addColorStop(1,`rgba(255,240,180,${s.life*.9})`);
+      fxX.beginPath();fxX.moveTo(s.x-s.vx*8,s.y-s.vy*8);fxX.lineTo(s.x,s.y);
+      fxX.strokeStyle=g;fxX.lineWidth=1.5;fxX.stroke();
+      fxX.beginPath();fxX.arc(s.x,s.y,1.5,0,Math.PI*2);
+      fxX.fillStyle=`rgba(255,255,200,${s.life})`;fxX.fill();
+      return true;
+    });
+  }
+
+  // floating dust
+  dust.forEach(d=>{
+    d.x+=d.vx;d.y+=d.vy;d.life+=.002;
+    if(d.y<-5){d.y=H+5;d.x=Math.random()*W;}
+    if(d.x<0||d.x>W) d.x=Math.random()*W;
+    const op=revealed?d.op*.6:d.op*.2;
+    bgX.beginPath();bgX.arc(d.x,d.y,d.r,0,Math.PI*2);
+    bgX.fillStyle=`rgba(212,168,67,${op})`;bgX.fill();
+  });
+
+  // fireflies
+  if(revealed){
+    fireflies.forEach(f=>{
+      f.phase+=f.speed;f.x+=f.vx+Math.sin(f.phase)*.4;f.y+=f.vy+Math.cos(f.phase*.7)*.3;
+      if(f.x<0)f.x=W;if(f.x>W)f.x=0;
+      if(f.y<0)f.y=H*.8;if(f.y>H*.85)f.y=0;
+      const op=(.5+Math.sin(f.phase)*0.5)*.7;
+      fxX.beginPath();fxX.arc(f.x,f.y,f.r,0,Math.PI*2);
+      fxX.fillStyle=`rgba(255,240,120,${op})`;fxX.fill();
+      fxX.beginPath();fxX.arc(f.x,f.y,f.r*4,0,Math.PI*2);
+      fxX.fillStyle=`rgba(255,220,80,${op*.2})`;fxX.fill();
+    });
+  }
+
+  // burst particles
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.trail.push({x:p.x,y:p.y,op:p.life});
+    if(p.trail.length>6) p.trail.shift();
+    p.x+=p.vx;p.y+=p.vy;p.vy+=p.gravity;p.vx*=.97;p.life-=p.decay;
+    if(p.life<=0){particles.splice(i,1);continue;}
+    // trail
+    p.trail.forEach((pt,ti)=>{
+      fxX.beginPath();fxX.arc(pt.x,pt.y,p.r*(ti/p.trail.length)*.6,0,Math.PI*2);
+      fxX.fillStyle=p.color+(pt.op*(ti/p.trail.length)*.4)+')';fxX.fill();
+    });
+    fxX.beginPath();fxX.arc(p.x,p.y,p.r,0,Math.PI*2);
+    fxX.fillStyle=p.color+p.life+')';fxX.fill();
+    // glow
+    fxX.beginPath();fxX.arc(p.x,p.y,p.r*2.5,0,Math.PI*2);
+    fxX.fillStyle=p.color+(p.life*.3)+')';fxX.fill();
+  }
+
+  drawStrings();
+}
+render();
+
+// shooting stars periodically after reveal
+setInterval(()=>{if(revealed && Math.random()<.6) spawnShootingStar();},4000);
+
+// ═══════════════════════════════════════════════
+// LAMP INTERACTION
+// ═══════════════════════════════════════════════
+const cordArea=document.getElementById('cordArea');
+const cordLine=document.getElementById('cordLine');
+const flameEl =document.getElementById('flameEl');
+const flash   =document.getElementById('flashOverlay');
+let lit=false,dragging=false,startY=0,hasPulled=false;
+
+function triggerLamp(){
+  if(lit) return; lit=true;
+
+  // cord spring effect
+  cordLine.style.height='130px';
+  setTimeout(()=>cordLine.style.height='100px',200);
+
+  // glow lamp up first
+  flameEl.style.opacity='1';
+
+  // flash
+  setTimeout(()=>{
+    flash.style.opacity='1';
+    flash.style.transition='opacity .08s ease';
+    setTimeout(()=>{
+      flash.style.opacity='0';
+      flash.style.transition='opacity .6s ease';
+    },80);
+  },300);
+
+  // spawn burst from lantern position
+  setTimeout(()=>{
+    const lamp=document.getElementById('lampStage');
+    const rect=lamp.getBoundingClientRect();
+    const ox=rect.left+rect.width/2;
+    const oy=rect.top+rect.height*.55;
+    spawnBurst(ox,oy);
+    document.body.classList.add('lit');
+    setTimeout(()=>{
+      revealed=true;
+      spawnFireflies();
+      setTimeout(spawnShootingStar,1200);
+      setTimeout(spawnShootingStar,3500);
+    },1000);
+  },350);
+}
+
+cordArea.addEventListener('click',triggerLamp);
+cordArea.addEventListener('mousedown',e=>{dragging=true;startY=e.clientY;hasPulled=false;});
+window.addEventListener('mousemove',e=>{if(dragging&&e.clientY-startY>28) hasPulled=true;});
+window.addEventListener('mouseup',()=>{if(dragging&&hasPulled) triggerLamp();dragging=false;});
+cordArea.addEventListener('touchstart',e=>{dragging=true;startY=e.touches[0].clientY;hasPulled=false;},{passive:true});
+window.addEventListener('touchmove',e=>{if(dragging&&e.touches[0].clientY-startY>28) hasPulled=true;},{passive:true});
+window.addEventListener('touchend',()=>{if(dragging&&hasPulled) triggerLamp();dragging=false;});
+cordArea.style.cursor='grab';
+</script>
+</body>
+</html>
