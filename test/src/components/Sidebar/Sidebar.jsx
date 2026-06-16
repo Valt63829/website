@@ -3,7 +3,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/logo.png";
-import ProfileModal from "../profile/ProfileModal";
+import ProfileModal from "../Profile/ProfileModal";
 
 const Sidebar = ({ clearChat, toggleSidebar }) => {
   const { user, userName, avatarLetter } = useAuth();
