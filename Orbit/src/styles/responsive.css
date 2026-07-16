@@ -1,0 +1,321 @@
+/* ==========================================
+   ORBIT GLOBAL RESPONSIVE
+========================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    -webkit-text-size-adjust: 100%;
+}
+
+img,
+video,
+svg,
+canvas {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+    max-width: 100%;
+}
+
+.container,
+.content,
+.owner-content,
+.page-container {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* =========================================
+   LARGE DESKTOP
+========================================= */
+
+@media (min-width: 1440px) {
+
+    .content,
+    .owner-content,
+    .page-container,
+    .profile-container,
+    .search-container,
+    .settings-container,
+    .reward-page,
+    .noti-page,
+    .rm-container,
+    .em-container,
+    .user-management {
+        max-width: 1600px;
+        margin: auto;
+    }
+
+}
+
+/* =========================================
+   LAPTOP
+========================================= */
+
+@media (min-width:1024px) and (max-width:1439px) {
+
+    .content,
+    .owner-content {
+        padding: 24px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (min-width:768px) and (max-width:1023px) {
+
+    .content,
+    .owner-content {
+        padding: 20px;
+    }
+
+    .dashboard,
+    .owner-layout {
+        display: flex;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .home-page {
+        flex-direction: column;
+    }
+
+    .main-area,
+    .right-panel {
+        width: 100%;
+    }
+
+    .page-header,
+    .topbar,
+    .profile-info,
+    .reward-stats-bar {
+        flex-wrap: wrap;
+    }
+
+    .chat-sidebar {
+        width: 280px;
+    }
+
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width:768px) {
+
+    html {
+        font-size: 15px;
+    }
+
+    /* Layout */
+
+    .dashboard,
+    .home-page,
+    .page-container,
+    .owner-layout {
+        width: 100%;
+    }
+
+    .content,
+    .owner-content {
+        width: 100%;
+        margin: 0;
+        padding: 16px;
+    }
+
+    /* Sidebar */
+
+    .sidebar,
+    .owner-sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 260px;
+        height: 100vh;
+        z-index: 1000;
+        transition: left .3s ease;
+    }
+
+    .sidebar.open,
+    .owner-sidebar.active {
+        left: 0;
+    }
+
+    .owner-menu-toggle {
+        display: flex !important;
+    }
+
+    /* Remove horizontal scrolling */
+
+    .row,
+    .grid,
+    .flex {
+        max-width: 100%;
+    }
+
+    .card,
+    .event-card,
+    .reward-section,
+    .settings-card,
+    .search-card,
+    .profile-card {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .stats-grid,
+    .daily-grid,
+    .em-stats,
+    .rm-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* Header */
+
+    .page-header,
+    .topbar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .page-header>*,
+    .topbar>* {
+        width: 100%;
+    }
+
+    /* Inputs */
+
+    input,
+    textarea,
+    select {
+        width: 100%;
+    }
+
+    button {
+        min-height: 46px;
+    }
+
+    /* Tables */
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    /* Chat */
+
+    .chat-page {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    .chat-sidebar {
+        width: 100%;
+        height: 220px;
+    }
+
+    .chat-window {
+        width: 100%;
+        flex: 1;
+    }
+
+    .message-row {
+        max-width: 90%;
+    }
+
+    /* Profile */
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    /* Login */
+
+    .login-container,
+    .login-card,
+    .auth-card {
+        width: 100%;
+        max-width: 380px;
+        margin: auto;
+        padding: 20px;
+    }
+
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width:480px) {
+
+    html {
+        font-size: 14px;
+    }
+
+    .content,
+    .owner-content {
+        padding: 12px;
+    }
+
+    .page-header h1 {
+        font-size: 22px;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    .chat-sidebar {
+        height: 180px;
+    }
+
+    .login-card {
+        padding: 18px;
+    }
+
+}

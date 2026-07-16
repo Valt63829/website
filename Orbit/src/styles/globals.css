@@ -1,0 +1,50 @@
+/* globals.css — re-exports index.css variables as aliases */
+/* Import this in any component that uses the old variable names */
+
+/* ─── Backward-compat aliases ─── */
+/* These point TO index.css variables, never to themselves */
+:root,
+[data-theme="dark"],
+[data-theme="light"] {
+  --bg: var(--background);
+  --bg-secondary: var(--bg-secondary);
+  --fg: var(--text);
+  --fg-muted: var(--text-secondary);
+  --input-bg: var(--input);
+  --card-bg: var(--card);
+  --card-hover-bg: var(--card-hover);
+  --border-color: var(--border);
+  --modal-bg: var(--modal-bg);
+
+  --accent: var(--accent);
+  --accent-soft: var(--accent-soft);
+  --accent-bg: var(--accent-bg);
+  --accent-border: var(--accent-border);
+  --accent-focus: var(--accent-focus);
+  --accent-glow: var(--accent-glow);
+
+  --info: var(--info);
+  --info-soft: var(--info-soft);
+  --info-bg: var(--info-bg);
+  --info-border: var(--info-border);
+
+  --success-bg: var(--success-bg);
+  --success-border: var(--success-border);
+  --danger-bg: var(--danger-bg);
+  --danger-border: var(--danger-border);
+
+  --warning: var(--warning);
+  --warning-bg: var(--warning-bg);
+
+  --surface-dim: var(--surface-dim);
+  --surface-hover: var(--surface-hover);
+  --surface-overlay: var(--surface-overlay);
+  --overlay: var(--overlay);
+
+  --avatar-border: var(--avatar-border);
+  --avatar-fallback: var(--avatar-fallback);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+  --shadow-accent: var(--shadow-accent);
+}
