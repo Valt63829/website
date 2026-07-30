@@ -1,6 +1,6 @@
 export const sendMessageToAI = async (message) => {
   const response = await fetch(
-    "http://localhost:5000/api/chat",
+    "https://website-7ngm.onrender.com/api/chat",
     {
       method: "POST",
       headers: {
