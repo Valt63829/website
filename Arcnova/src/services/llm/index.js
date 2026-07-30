@@ -4,7 +4,7 @@ export const getAIResponse = async (
 ) => {
   try {
     const res = await fetch(
-      "http://localhost:5000/api/chat",
+      "https://website-7ngm.onrender.com/api/chat",
       {
         method: "POST",
         headers: {
